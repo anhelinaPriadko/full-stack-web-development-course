@@ -1,3 +1,4 @@
+import ContentLine from './ContentLine'
 const Content = (props) => {
     return (
         <>

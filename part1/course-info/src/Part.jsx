@@ -1,4 +1,4 @@
-const ContentLine = (props) => {
+const Part = (props) => {
     return (
         <p> 
             {props.part} {props.exercises}
@@ -6,4 +6,4 @@ const ContentLine = (props) => {
     );
 }
 
-export default ContentLine;
+export default Part;

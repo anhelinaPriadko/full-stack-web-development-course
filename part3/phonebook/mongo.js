@@ -1,3 +1,6 @@
+const dns = require('dns')
+dns.setServers(['8.8.8.8', '8.8.4.4'])
+
 const mongoose = require('mongoose')
 
 if (process.argv.length < 3) {
@@ -7,7 +10,8 @@ if (process.argv.length < 3) {
 
 const password = process.argv[2]
 
-const url = `mongodb://fullstack:${password}@ac-y8033rp-shard-00-00.dootyfu.mongodb.net:27017,ac-y8033rp-shard-00-01.dootyfu.mongodb.net:27017,ac-y8033rp-shard-00-02.dootyfu.mongodb.net:27017/?ssl=true&replicaSet=atlas-rn0z2x-shard-0&authSource=admin`
+const url = `mongodb+srv://fullstack:${password}@cluster0.dootyfu.mongodb.net/phonebookApp?retryWrites=true&w=majority`
+
 mongoose.set('strictQuery', false)
 mongoose.connect(url, { family: 4 })
 
@@ -41,5 +45,5 @@ if (process.argv.length === 3) {
   })
 } else {
   console.log('Please provide the correct arguments: node mongo.js <password> <name> <number>')
-  mongoose.connection.close()
+    mongoose.connection.close()
 }

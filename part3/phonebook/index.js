@@ -1,7 +1,16 @@
 const express = require('express')
+const morgan = nativeRequire = require('morgan')
 const app = express()
 
 app.use(express.json())
+
+const util = require('util')
+
+morgan.token('body', (req, res) => {
+  return util.inspect(req.body, { compact: true, depth: null, colors: false })
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 let persons = [
   { 

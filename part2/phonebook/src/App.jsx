@@ -73,6 +73,10 @@ const App = () => {
         setNewNumber('')
         notify(`Added ${returnedPerson.name}`)
       })
+      .catch(error => {
+        console.error('Validation failed:', error)
+        notify(error.response.data.error, 'error')
+      })
   }
 
   const deletePersonOf = (id, name) => {

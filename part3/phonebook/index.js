@@ -1,8 +1,11 @@
 const express = require('express')
 const morgan = nativeRequire = require('morgan')
+const cors = require('cors')
 const app = express()
 
+app.use(cors())
 app.use(express.json())
+app.use(express.static('dist'))
 
 const util = require('util')
 
@@ -99,7 +102,7 @@ app.post('/api/persons', (request, response) => {
   response.json(person)
 })
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

@@ -2,14 +2,29 @@ const { test, after, beforeEach, describe } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcryptjs')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const helper = require('./test_helper')
+
+let token
 
 beforeEach(async () => {
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
+
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash('secret', 10)
+  const user = new User({ username: 'testuser', name: 'Test User', passwordHash })
+  await user.save()
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: 'testuser', password: 'secret' })
+
+  token = loginResponse.body.token
 })
 
 describe('when there is initially some blogs saved', () => {
@@ -28,7 +43,7 @@ describe('when there is initially some blogs saved', () => {
   })
 
   describe('addition of a new blog', () => {
-    test('a valid blog can be added', async () => {
+    test('a valid blog can be added with token', async () => {
       const newBlog = {
         title: 'Canonical string reduction',
         author: 'Edsger W. Dijkstra',
@@ -38,6 +53,7 @@ describe('when there is initially some blogs saved', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -49,6 +65,22 @@ describe('when there is initially some blogs saved', () => {
       assert(titles.includes('Canonical string reduction'))
     })
 
+    test('fails with status 401 if token is missing', async () => {
+      const newBlog = {
+        title: 'Unauthorized blog',
+        author: 'Hacker',
+        url: 'https://example.com/unauthorized',
+      }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+
+      const blogsAtEnd = await helper.blogsInDb()
+      assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+    })
+
     test('likes property defaults to 0 if missing', async () => {
       const newBlog = {
         title: 'Blog without likes property',
@@ -58,6 +90,7 @@ describe('when there is initially some blogs saved', () => {
 
       const response = await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
 
@@ -70,14 +103,22 @@ describe('when there is initially some blogs saved', () => {
         url: 'https://example.com/no-title',
       }
 
-      await api.post('/api/blogs').send(missingTitleBlog).expect(400)
+      await api
+        .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
+        .send(missingTitleBlog)
+        .expect(400)
 
       const missingUrlBlog = {
         title: 'Missing Url Blog',
         author: 'Anonymous',
       }
 
-      await api.post('/api/blogs').send(missingUrlBlog).expect(400)
+      await api
+        .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
+        .send(missingUrlBlog)
+        .expect(400)
 
       const blogsAtEnd = await helper.blogsInDb()
       assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)

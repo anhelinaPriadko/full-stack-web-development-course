@@ -45,5 +45,5 @@ if (process.argv.length === 3) {
   })
 } else {
   console.log('Please provide the correct arguments: node mongo.js <password> <name> <number>')
-    mongoose.connection.close()
+  mongoose.connection.close()
 }

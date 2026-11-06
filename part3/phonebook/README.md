@@ -2,4 +2,4 @@
 
 This is the backend with frontend for the Full Stack Open phonebook application.
 
-Live App URL: [https://phonebook-backend-wumg.onrender.com/api/persons]
+Live App URL: [https://phonebook-backend-wumg.onrender.com]
